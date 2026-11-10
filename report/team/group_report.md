@@ -38,7 +38,7 @@ $env:RESEARCH_PROVIDER = 'ollama'
 $env:OLLAMA_MODEL = 'llama3.2:3b'
 ```
 
-**Link dùng thử.** Demo dùng Ollama. Trang từng được kiểm tra trả HTTP 200 và kết nối WebSocket của Streamlit hoạt động; cần kiểm tra lại link trước buổi trình diễn vì Cloudflare Tunnel chỉ hoạt động khi máy chủ demo đang chạy. Luồng Telegram trên UI chỉ xem trước nội dung. [Mở demo](https://cordless-excess-sys-friend.trycloudflare.com)
+**Bằng chứng demo.** Demo Streamlit dùng Ollama đã được kiểm tra qua Cloudflare Tunnel với HTTP 200 và kết nối WebSocket. Tunnel tạm hiện đã ngừng truy cập. Có thể đối chiếu bốn lượt chat live ở mục B4 và chạy lại UI theo lệnh trên. Luồng Telegram trên UI chỉ xem trước nội dung. [Transcript live](../../starter_v0/transcripts/v3_ollama_20261110T191413259029.transcript.json)
 
 ### A2. Tool agent có
 
@@ -149,7 +149,7 @@ Chat live dùng prompt v3 và YAML tích hợp tool mới. Lượt 1 và 3 đề
 |---|---|---|---|
 | `dedupe_sources` | [Implementation](../../starter_v0/tools/dedupe_sources/tool.py) | Giữ nguồn đầu tiên và đếm số mục bỏ trùng. | Chỉ xử lý dữ liệu đã có trong bộ nhớ. |
 | Unit test tool mới | [Tests](../../starter_v0/tests/test_tools_todo.py) · [output pytest](../../starter_v0/analysis/pytest_20261110.txt) | 3 test cho tool mới và 3 test hồi quy chat pass. Toàn suite có 73 pass, 14 skip từ starter. | Test chat kiểm tra bỏ lời gọi trùng, chặn tool ngoài danh sách và xử lý args dư rỗng. Eval nhóm đo lựa chọn của model. |
-| UI | [app.py](../../starter_v0/app.py) và [link dùng thử](https://cordless-excess-sys-friend.trycloudflare.com) | AppTest với Ollama thật đã xác nhận UI hỏi URL và chờ trả lời. Trang public trả HTTP 200 và WebSocket kết nối được. | Demo Telegram chỉ xem trước. Tunnel cần máy demo đang chạy. |
+| UI | [app.py](../../starter_v0/app.py), [transcript live](../../starter_v0/transcripts/v3_ollama_20261110T191413259029.transcript.json) và lệnh ở A1 | AppTest với Ollama thật xác nhận UI hỏi URL và chờ trả lời. Buổi kiểm thử qua tunnel đã xác nhận HTTP 200 và WebSocket. | Demo Telegram chỉ xem trước. Tunnel của buổi kiểm thử hiện đã ngừng truy cập. |
 
 ### B5. Bonus Evidence
 
@@ -162,9 +162,9 @@ Nhóm dùng một model local, `llama3.2:3b`, để tiếp tục các vòng eval
 ## 5. Khó khăn và cách xử lý
 
 - Preflight qua OpenRouter trả HTTP 402 với model mặc định và HTTP 429 với `google/gemma-4-31b-it:free`. `nvidia/nemotron-3.5-lightning:free` đo đủ 20 case trong baseline. Baseline sử dụng bản sao prompt và YAML gốc lưu trước khi đăng ký tool mới.
-- Sau khi Minh điền `.env` trên máy này, lệnh preflight OpenRouter với `nvidia/nemotron-3.5-lightning:free` trả HTTP 401 (`Missing Authentication header`). Không dùng lượt này làm bằng chứng API hoạt động; cần kiểm tra lại key hoặc cấu hình truy cập trước khi chạy eval mới. Unit test offline vẫn đạt 73 passed, 14 skipped, 0 failed.
+- Minh ghi nhận preflight OpenRouter trả HTTP 401 (`Missing Authentication header`) khi thử cấu hình của mình. Lần kiểm tra gần nhất trên máy demo với `nvidia/nemotron-3.5-lightning:free` trả HTTP 429 (`free-models-per-day`). Unit test chạy lại đạt 73 passed, 14 skipped, 0 failed.
 - OpenRouter dừng ở case R13 khi chạy v2 với HTTP 429 do hết hạn mức model miễn phí trong ngày. Lượt chạy dở không dùng làm bằng chứng điểm. Các phiên bản sau được đo lại trên cùng model Ollama để kiểm soát biến model.
-- Smoke test Tavily và Firecrawl trả dữ liệu thật. Twitter API45 trả HTTP 403 với thông báo key chưa đăng ký API. Một lượt thử `social_search` trả HTTP 429. Runner chấm routing và tham số riêng với lỗi chạy tool, nên các lỗi này vẫn cần đối chiếu trong `tool_results`.
+- Lần smoke test gần nhất, Tavily và Firecrawl mỗi tool trả một kết quả. Twitter API45 trả HTTP 403 (`not subscribed`) với `timeline` và HTTP 429 (`too many requests`) với `social_search`. Cần kiểm tra đăng ký Twitter API45 của app cấp key trước khi thử lại. Runner chấm routing và tham số riêng với lỗi thực thi ghi trong `tool_results`.
 - Chat thử v3 lặp cùng một lời gọi `lookup` hoặc `fetch` tới giới hạn vòng lặp. Vòng lặp chat hiện bỏ qua lời gọi trùng trong một lượt và yêu cầu model tổng hợp từ dữ liệu đã nhận khi không có lời gọi mới. [Transcript tái hiện lỗi](../../starter_v0/transcripts/v3_ollama_20261110T190602453839.transcript.json)
 - Khi thử UI, model thêm trường rỗng như `url=""` vào `clarify`. Vòng lặp chat giữ args gốc trong log và bỏ trường lạ có giá trị rỗng trước khi chạy tool. Runner eval vẫn chấm lời gọi gốc.
 - Hai yêu cầu Ollama chạy kéo dài trong lần thử group và chat song song. Lượt chạy lại theo thứ tự và giới hạn phản hồi local ở 1.024 token. Các run base v0-local đến v3 giữ cấu hình sinh ban đầu để so sánh.

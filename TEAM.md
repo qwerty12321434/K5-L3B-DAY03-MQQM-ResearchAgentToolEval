@@ -6,14 +6,14 @@
 - Lớp: L3B
 - Repo nhóm: [K5-L3B-DAY03-MQQM-ResearchAgentToolEval](https://github.com/qwerty12321434/K5-L3B-DAY03-MQQM-ResearchAgentToolEval)
 - Nhánh nộp: `main`
-- Commit bài nhóm hiện có: `b0094a1`; commit chốt sau khi hoàn tất báo cáo: cập nhật khi nộp.
+- Commit chốt code và bằng chứng: [`b0094a1`](https://github.com/qwerty12321434/K5-L3B-DAY03-MQQM-ResearchAgentToolEval/commit/b0094a1ca86508eb18c7f93b39e28bf2eadde91b). Báo cáo cá nhân được hoàn thiện ở [`135ee7d`](https://github.com/qwerty12321434/K5-L3B-DAY03-MQQM-ResearchAgentToolEval/commit/135ee7d6dd03cc22152e81e0a6062b74f7bc171e).
 
 ## Thành viên
 
 | STT | Họ tên | MSSV | Email | GitHub | Vai trò |
 | --: | ------ | ---- | ----- | ------ | ------- |
-|   1 | Nguyễn Hải Quang | 2A202603936 |       |        | Phụ trách eval nhóm, UI/live chat và báo cáo nhóm. |
-|   2 | Trần Quang Minh | 2A202603929 | tqminhhn04@gmail.com |        | Phụ trách setup, baseline v0, tối ưu v1–v3, tool mới và unit test. |
+|   1 | Nguyễn Hải Quang | 2A202603936 | quangnh2004@gmail.com | [qwerty12321434](https://github.com/qwerty12321434) | Phụ trách eval nhóm, UI/live chat và báo cáo nhóm. |
+|   2 | Trần Quang Minh | 2A202603929 | tqminhhn04@gmail.com | [MinhTrannnnn](https://github.com/MinhTrannnnn) | Phụ trách setup, baseline v0, tối ưu v1–v3, tool mới và unit test. |
 
 ## Cá nhân
 

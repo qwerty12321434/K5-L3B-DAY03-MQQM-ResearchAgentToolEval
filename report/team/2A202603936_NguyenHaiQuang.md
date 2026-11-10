@@ -4,7 +4,7 @@
 
 - Họ tên: Nguyễn Hải Quang
 - MSSV: 2A202603936
-- Email: Chưa cung cấp
+- Email: quangnh2004@gmail.com
 
 ## 2. Phần việc phụ trách
 
