@@ -4,6 +4,7 @@ import argparse
 import json
 import re
 from datetime import datetime
+from inspect import signature
 from pathlib import Path
 from typing import Any
 
@@ -50,7 +51,13 @@ def execute_tool_call(call: ToolCall) -> dict[str, Any]:
             "result": {"error": "unknown_tool", "message": f"No local implementation for {call.name}"},
         }
     try:
-        result = func(**call.args)
+        parameters = signature(func).parameters
+        arguments = {
+            key: value
+            for key, value in call.args.items()
+            if key in parameters or value not in (None, "")
+        }
+        result = func(**arguments)
     except Exception as exc:
         result = {"error": type(exc).__name__, "message": str(exc)}
     return {"tool": call.name, "args": call.args, "result": result}
@@ -88,6 +95,8 @@ def run_model_tool_loop(
     working_messages = list(messages)
     rounds: list[dict[str, Any]] = []
     all_tool_events: list[dict[str, Any]] = []
+    executed_calls: set[tuple[str, str]] = set()
+    available_tools = {tool["function"]["name"] for tool in tools}
 
     for round_index in range(1, max_tool_rounds + 1):
         response = provider.complete(working_messages, tools, model=model, temperature=0.0)
@@ -112,8 +121,25 @@ def run_model_tool_loop(
         non_clarification_events: list[dict[str, Any]] = []
 
         for call in calls:
-            print(f"🔧 {call.name}({json.dumps(call.args, ensure_ascii=False, sort_keys=True)})")
-            event = execute_tool_call(call)
+            arguments = json.dumps(call.args, sort_keys=True)
+            call_key = (call.name, arguments)
+            if call_key in executed_calls:
+                round_record["tool_results"].append({
+                    "tool": call.name,
+                    "args": call.args,
+                    "result": {"status": "duplicate_call_skipped"},
+                })
+                continue
+            executed_calls.add(call_key)
+            print(f"Tool {ascii(call.name)}({arguments})")
+            if call.name in available_tools:
+                event = execute_tool_call(call)
+            else:
+                event = {
+                    "tool": call.name,
+                    "args": call.args,
+                    "result": {"error": "tool_not_available"},
+                }
             round_record["tool_results"].append(event)
             all_tool_events.append(event)
 
@@ -133,11 +159,33 @@ def run_model_tool_loop(
             non_clarification_events.append(event)
 
         rounds.append(round_record)
+        if not non_clarification_events:
+            break
         working_messages.append(tool_results_message(non_clarification_events))
+
+    if all_tool_events:
+        working_messages.append({
+            "role": "user",
+            "content": "Give a final answer to the user's request using the tool results above. Include available sources and any errors.",
+        })
+        final = provider.complete(working_messages, [], model=model, temperature=0.0)
+        rounds.append({
+            "round": len(rounds) + 1,
+            "assistant_text": final.text,
+            "tool_calls": [{"name": call.name, "args": call.args} for call in final.tool_calls],
+            "tool_results": [],
+        })
+        if final.text:
+            return {
+                "status": "answered",
+                "assistant_text": final.text,
+                "rounds": rounds,
+                "tool_events": all_tool_events,
+            }
 
     return {
         "status": "max_tool_rounds",
-        "assistant_text": f"Stopped after {max_tool_rounds} tool rounds. Inspect the transcript for details.",
+        "assistant_text": "Stopped without a final answer. Inspect the transcript for details.",
         "rounds": rounds,
         "tool_events": all_tool_events,
     }

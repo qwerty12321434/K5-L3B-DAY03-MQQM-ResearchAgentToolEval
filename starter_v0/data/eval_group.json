@@ -3,5 +3,102 @@
   "dataset_role": "group",
   "description": "Case do NHÓM tự viết thêm để cover thêm trường hợp. Mỗi case cần: id, phase='B', query HOẶC turns, failure_type (thuộc allowed_failure_types), và expect (tool_calls[...] hoặc no_tool=true). Nên kèm metadata.what_it_tests.",
   "allowed_failure_types": ["wrong_tool", "wrong_arg_value", "wrong_boundary", "unnecessary_tool", "out_of_scope", "missing_info"],
-  "cases": []
+  "cases": [
+    {
+      "id": "G-S01-dedupe-sources",
+      "phase": "B",
+      "query": "Gộp URL trùng trong danh sách này, giữ nguồn xuất hiện đầu tiên: https://example.org/solar#intro, https://EXAMPLE.ORG/solar#results, https://example.org/wind. Chỉ xử lý danh sách, không mở link.",
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "dedupe_sources"}]},
+      "metadata": {"what_it_tests": "Chọn tool gộp nguồn cục bộ cho danh sách URL đã có."}
+    },
+    {
+      "id": "G-S02-internal-privacy",
+      "phase": "B",
+      "query": "Chỉ tra trong handbook nội bộ: quy định về đưa dữ liệu cá nhân vào prompt AI thuộc nhóm data_privacy là gì?",
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "policy", "args": {"policy_area": "data_privacy"}}]},
+      "metadata": {"what_it_tests": "Dùng kho policy đúng nhóm khi người dùng giới hạn nguồn nội bộ."}
+    },
+    {
+      "id": "G-S03-monthly-news-limit",
+      "phase": "B",
+      "query": "Tìm đúng 3 tin về pin thể rắn trên web trong tháng qua.",
+      "failure_type": "wrong_arg_value",
+      "expect": {"tool_calls": [{"name": "lookup", "args": {"topic": "news", "timeframe": "month", "max_results": 3}}]},
+      "metadata": {"what_it_tests": "Ánh xạ tin tức, phạm vi một tháng và giới hạn 3 kết quả."}
+    },
+    {
+      "id": "G-S04-planning-only",
+      "phase": "B",
+      "query": "Gợi ý 3 hướng để mình tự nghiên cứu về hạ tầng xe điện. Chỉ cần dàn ý, chưa tra cứu hay gọi công cụ.",
+      "failure_type": "unnecessary_tool",
+      "expect": {"no_tool": true},
+      "metadata": {"what_it_tests": "Trả lời yêu cầu lên dàn ý trực tiếp khi người dùng hoãn tra cứu."}
+    },
+    {
+      "id": "G-S05-missing-handle",
+      "phase": "B",
+      "query": "Lấy 2 bài gần nhất trên X của trưởng nhóm mình. Bạn chưa có tên tài khoản; hỏi mình handle trước nhé.",
+      "failure_type": "missing_info",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "text"}}]},
+      "metadata": {"what_it_tests": "Hỏi handle chưa biết thay vì đoán danh tính."}
+    },
+    {
+      "id": "G-M01-change-social-order",
+      "phase": "B",
+      "turns": [
+        {"role": "user", "content": "Tìm 2 bài phổ biến nhất trên X về Rust."},
+        {"role": "user", "content": "Đổi cách sắp xếp sang mới nhất, giữ từ khóa Rust và số lượng ban đầu."}
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {"tool_calls": [{"name": "social_search", "args": {"query": "Rust", "search_type": "Latest", "limit": 2}}]},
+      "metadata": {"what_it_tests": "Đổi cách sắp xếp, giữ nguyên chủ đề và giới hạn từ lượt trước."}
+    },
+    {
+      "id": "G-M02-replace-url",
+      "phase": "B",
+      "turns": [
+        {"role": "user", "content": "Đọc trang hướng dẫn https://www.python.org/about/."},
+        {"role": "user", "content": "Mình gửi nhầm. Chỉ đọc đúng link thay thế https://docs.python.org/3/tutorial/ nhé."}
+      ],
+      "failure_type": "wrong_arg_value",
+      "expect": {"tool_calls": [{"name": "fetch", "args": {"url": "https://docs.python.org/3/tutorial/"}}]},
+      "metadata": {"what_it_tests": "URL sửa ở lượt mới ghi đè URL cũ và không cần tìm thêm."}
+    },
+    {
+      "id": "G-M03-revised-draft-needs-confirmation",
+      "phase": "B",
+      "turns": [
+        {"role": "user", "content": "Mình đồng ý với bản nháp cũ: Buổi chia sẻ bắt đầu lúc 15h."},
+        {"role": "user", "content": "Đổi bản nháp thành Buổi chia sẻ bắt đầu lúc 16h. Mình muốn đăng bản mới lên Telegram, hãy hỏi mình có xác nhận bản mới hay không trước khi gửi."}
+      ],
+      "failure_type": "wrong_boundary",
+      "expect": {"tool_calls": [{"name": "clarify", "args": {"response_type": "yes_no"}}]},
+      "metadata": {"what_it_tests": "Việc đồng ý bản cũ không cho phép gửi nội dung đã sửa."}
+    },
+    {
+      "id": "G-M04-cancel-request",
+      "phase": "B",
+      "turns": [
+        {"role": "user", "content": "Chuẩn bị đăng bản tin demo lên Telegram."},
+        {"role": "assistant", "content": "Bạn xác nhận gửi bản tin demo lên Telegram chứ?"},
+        {"role": "user", "content": "Không, hủy gửi và chỉ trả lời rằng bạn đã ghi nhận."}
+      ],
+      "failure_type": "wrong_boundary",
+      "expect": {"no_tool": true},
+      "metadata": {"what_it_tests": "Dừng luồng gửi khi người dùng từ chối ở lượt mới nhất."}
+    },
+    {
+      "id": "G-M05-format-existing-items",
+      "phase": "B",
+      "turns": [
+        {"role": "user", "content": "Mình có 2 nguồn: Hướng dẫn Python tại https://docs.python.org/3/tutorial/ và Tổng quan Rust tại https://www.rust-lang.org/learn."},
+        {"role": "user", "content": "Định dạng 2 nguồn trên thành bản tin gạch đầu dòng với mẫu bullets. Không mở hoặc tìm thêm nguồn."}
+      ],
+      "failure_type": "wrong_tool",
+      "expect": {"tool_calls": [{"name": "format", "args": {"template": "bullets"}}]},
+      "metadata": {"what_it_tests": "Dùng format với dữ liệu có sẵn từ lượt trước và chọn đúng mẫu."}
+    }
+  ]
 }
