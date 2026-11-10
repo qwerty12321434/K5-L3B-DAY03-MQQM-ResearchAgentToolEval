@@ -1,0 +1,24 @@
+...................................................................sssss [ 82%]
+sssssssss......                                                          [100%]
+=============================== warnings summary ===============================
+.venv/lib/python3.9/site-packages/urllib3/__init__.py:35
+  /Users/minhtran/Documents/VinK5/Lab3/K5-L3B-DAY03-MQQM-ResearchAgentToolEval/starter_v0/.venv/lib/python3.9/site-packages/urllib3/__init__.py:35: NotOpenSSLWarning: urllib3 v2 only supports OpenSSL 1.1.1+, currently the 'ssl' module is compiled with 'LibreSSL 2.8.3'. See: https://github.com/urllib3/urllib3/issues/3020
+    warnings.warn(
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+SKIPPED [1] tests/test_tools_todo.py:28: TODO CP3 (student): implement this test
+SKIPPED [1] tests/test_tools_todo.py:35: TODO CP3 (student): implement this test
+SKIPPED [1] tests/test_tools_todo.py:40: TODO CP3 (student): implement this test
+SKIPPED [1] tests/test_tools_todo.py:45: TODO CP3 (student): implement this test
+SKIPPED [1] tests/test_tools_todo.py:53: TODO CP3 (student): implement this test
+SKIPPED [1] tests/test_tools_todo.py:57: TODO CP3 (student): implement this test
+SKIPPED [1] tests/test_tools_todo.py:64: TODO CP3 (student): implement this test
+SKIPPED [1] tests/test_tools_todo.py:72: TODO CP3 (student): implement this test
+SKIPPED [1] tests/test_tools_todo.py:76: TODO CP3 (student): implement this test
+SKIPPED [1] tests/test_tools_todo.py:84: TODO CP3 (student): implement this test
+SKIPPED [1] tests/test_tools_todo.py:89: TODO CP3 (student): implement this test
+SKIPPED [1] tests/test_tools_todo.py:95: TODO CP3 (student): implement this test
+SKIPPED [1] tests/test_tools_todo.py:100: TODO CP3 (student): implement this test
+SKIPPED [1] tests/test_tools_todo.py:106: TODO CP3 (student): implement this test
+73 passed, 14 skipped, 1 warning in 0.11s
